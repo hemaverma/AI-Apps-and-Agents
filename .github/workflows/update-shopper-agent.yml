@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - 'src/app/agents/shopperAgent_initializer.py'
-      - 'src/prompts/shopperAgentPrompt.txt'
+      - 'src/prompts/ShopperAgentPrompt.txt'
   workflow_dispatch:
 
 jobs:

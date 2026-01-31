@@ -1,4 +1,4 @@
-name: Update Customer Loyalty Agent
+name: Update Cart Manager Agent
 
 on:
   push:
@@ -6,8 +6,7 @@ on:
       - main
     paths:
       - 'src/app/agents/cartManagerAgent_initializer.py'
-      - 'src/prompts/cartManagerPrompt.txt'
-      - 'src/app/tools/discountLogic.py'
+      - 'src/prompts/CartManagerPrompt.txt'
   workflow_dispatch:
 
 jobs:
@@ -38,10 +37,10 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Run Customer Loyalty Agent Initializer
+      - name: Run Cart Manager Agent Initializer
         run: |
           cd src/app/agents
-          python customerLoyaltyAgent_initializer.py
+          python cartManagerAgent_initializer.py
         env:
           AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}

@@ -1,14 +1,13 @@
-name: Update Interior Design Agent
+name: Update Handoff Agent
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'src/app/agents/interiorDesignAgent_initializer.py'
-      - 'src/prompts/InteriorDesignAgentPrompt.txt'
-      - 'src/app/tools/imageCreationTool.py'
-      - 'src/app/tools/aiSearchTools.py'
+      - 'src/app/agents/handoffAgent_initializer.py'
+      - 'src/prompts/HandoffAgentPrompt.txt'
+      - 'src/services/handoff_service.py'
   workflow_dispatch:
 
 jobs:
@@ -39,10 +38,10 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Run Interior Design Agent Initializer
+      - name: Run Handoff Agent Initializer
         run: |
           cd src/app/agents
-          python interiorDesignAgent_initializer.py
+          python handoffAgent_initializer.py
         env:
           AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
