@@ -18,15 +18,11 @@ from azure.ai.agents.telemetry import trace_function
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 import time
-# from opentelemetry.instrumentation.openai_v2 import OpenAIInstrumentor
+from opentelemetry.instrumentation.openai_v2 import OpenAIInstrumentor
 
-# # Enable Azure Monitor tracing
-application_insights_connection_string = os.environ["APPLICATIONINSIGHTS_CONNECTION_STRING"]
-configure_azure_monitor(connection_string=application_insights_connection_string)
-# OpenAIInstrumentor().instrument()
-
-# scenario = os.path.basename(__file__)
-# tracer = trace.get_tracer(__name__)
+# Get tracer for this module (Azure Monitor is configured in chat_app.py)
+scenario = os.path.basename(__file__)
+tracer = trace.get_tracer(__name__)
 
 # Increase thread pool size for better concurrency
 _executor = ThreadPoolExecutor(max_workers=8)
@@ -87,6 +83,7 @@ def mcp_product_recommendations(question: str) -> str:
     return loop.run_until_complete(_get_product_recommendations())
 
 
+@trace_function()
 def mcp_calculate_discount(customer_id: str) -> str:
     """
     Calculate the discount based on customer data.
@@ -112,6 +109,7 @@ def mcp_calculate_discount(customer_id: str) -> str:
     return loop.run_until_complete(_calculate())
 
 # Create wrapper function that uses MCP client
+@trace_function()
 def mcp_inventory_check(product_list: List[str]) -> list:
     """
     Check inventory for products using MCP client.
@@ -164,6 +162,7 @@ class AgentProcessor:
         _toolset_cache[agent_type] = functions
         return functions
     
+    @trace_function()
     def run_conversation_with_text(self, input_message: str = ""):
         print("Running async!")
         start_time = time.time()
@@ -192,6 +191,7 @@ class AgentProcessor:
             yield message.response.output_text
         print(f"[TIMELOG] Total run_conversation_with_text time: {time.time() - start_time:.2f}s")
 
+    @trace_function()
     def _run_conversation_sync(self, input_message: str = ""):
         """Optimized synchronous conversation runner with better error handling."""
         thread_id = self.thread_id

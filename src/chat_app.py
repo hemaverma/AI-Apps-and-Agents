@@ -42,7 +42,7 @@ from utils.message_utils import (
 # Agent Imports
 from app.tools.understandImage import get_image_description
 from services.agent_service import get_or_create_agent_processor
-# from app.tools.singleAgentExample import generate_response
+from app.tools.singleAgentExample import generate_response
 from app.tools.aiSearchTools import product_recommendations
 from app.tools.imageCreationTool import create_image
 from app.servers.mcp_inventory_server import mcp as inventory_mcp
@@ -114,15 +114,9 @@ async def safe_operation(operation, fallback_value=None, operation_name="Unknown
 
 app = FastAPI()
 #set up MCP inventory server as a mounted app
-<<<<<<< HEAD
 inventory_mcp_app = inventory_mcp.sse_app()
 app.mount("/mcp-inventory/", inventory_mcp_app)
-project_endpoint = os.environ.get("AZURE_AI_AGENT_ENDPOINT")
-=======
-# inventory_mcp_app = inventory_mcp.sse_app()
-# app.mount("/mcp-inventory/", inventory_mcp_app)
 project_endpoint = os.environ.get("FOUNDRY_ENDPOINT")
->>>>>>> 21d2dde5dbd42e0026b5237f7bb80b038b1cd0e7
 if not project_endpoint:
     raise ValueError("FOUNDRY_ENDPOINT environment variable is required")
 project_client = AIProjectClient(
@@ -130,19 +124,11 @@ project_client = AIProjectClient(
     credential=DefaultAzureCredential(),
 )
 
-<<<<<<< HEAD
-llm_client = AzureOpenAI(
-    azure_endpoint=validated_env_vars['AZURE_OPENAI_ENDPOINT'],
-    api_key=validated_env_vars['AZURE_OPENAI_KEY'],
-    api_version=validated_env_vars['AZURE_OPENAI_API_VERSION'],
-)
-=======
-# # LLM client for the handoff service.
-# # Retrieves an AzureOpenAI client from the project client.
-# # Handoff service determines which agent to route to based on intent classification.
-# # The default for this is Cora, the general shopping assistant.
-# llm_client = project_client.get_openai_client()
->>>>>>> 21d2dde5dbd42e0026b5237f7bb80b038b1cd0e7
+# LLM client for the handoff service.
+# Retrieves an AzureOpenAI client from the project client.
+# Handoff service determines which agent to route to based on intent classification.
+# The default for this is Cora, the general shopping assistant.
+llm_client = project_client.get_openai_client()
 
 handoff_service = HandoffService(
     azure_openai_client=llm_client,
@@ -261,13 +247,15 @@ async def websocket_endpoint(websocket: WebSocket):
             
             # await websocket.send_text(fast_json_dumps({"answer": "This application is not yet ready to serve results. Please check back later.", "agent": None, "cart": persistent_cart}))
 
-            # # Single-agent example
+            # Single-agent example (commented out for multi-agent mode)
             # try:
             #     response = generate_response(user_message)
             #     await websocket.send_text(fast_json_dumps({"answer": response, "agent": "single", "cart": persistent_cart}))
+            #     continue  # Skip multi-agent processing when using single-agent
             # except Exception as e:
             #     logger.error("Error during single-agent response generation", exc_info=True)
             #     await websocket.send_text(fast_json_dumps({"answer": "Error during single-agent response generation", "error": str(e), "cart": persistent_cart}))
+            #     continue  # Skip multi-agent processing on error too
 
             # Multi-agent example with MCP inventory server and handoff service
             # Run customer loyalty task only once when session starts
@@ -363,7 +351,6 @@ async def websocket_endpoint(websocket: WebSocket):
                     }))
                     logger.info("Image analysis completed")
                 
-<<<<<<< HEAD
                 # =============================================================================
                 # PRODUCT RECOMMENDATIONS: AI Search integration for contextual products
                 # =============================================================================
@@ -371,15 +358,6 @@ async def websocket_endpoint(websocket: WebSocket):
                 # context (user message + visual analysis). This provides the agent with
                 # relevant product options to suggest based on user needs and visual context.
                 # =============================================================================
-=======
-            #     # =============================================================================
-            #     # PRODUCT RECOMMENDATIONS: Cosmos DB integration for contextual products
-            #     # =============================================================================
-            #     # For agents that make product recommendations, query Cosmos DB with enriched
-            #     # context (user message + visual analysis). This provides the agent with
-            #     # relevant product options to suggest based on user needs and visual context.
-            #     # =============================================================================
->>>>>>> 21d2dde5dbd42e0026b5237f7bb80b038b1cd0e7
                 
                 # Get product recommendations for relevant agents
                 if agent_name in ["interior_designer", "interior_designer_create_image", "cora"]:
@@ -507,23 +485,13 @@ async def websocket_endpoint(websocket: WebSocket):
                     # This replaces the old if-else branching with a single unified flow.
                     # =================================================================
                     
-<<<<<<< HEAD
                     # All agents use unified agent processor pattern
                     processor = get_or_create_agent_processor(
                         agent_id=agent_selected,     # Agent ID from environment variables
                         agent_type=agent_name,       # Agent type (cora, cart_manager, etc.)
-                        thread_id=thread.id,         # Conversation thread for stateful agents
+                        thread_id=None,              # Thread managed internally by processor
                         project_client=project_client  # Azure AI client for agent execution
                     )
-=======
-            #         # All agents use unified agent processor pattern
-            #         processor = get_or_create_agent_processor(
-            #             agent_id=agent_selected,     # Agent ID from environment variables
-            #             agent_type=agent_name,       # Agent type (cora, cart_manager, etc.)
-            #             thread_id=None,              # Conversation thread for stateful agents
-            #             project_client=project_client  # Foundry client for agent execution
-            #         )
->>>>>>> 21d2dde5dbd42e0026b5237f7bb80b038b1cd0e7
                     
                     # Stream response from agent (yields chunks as they're generated)
                     async for msg in processor.run_conversation_with_text_stream(input_message=agent_context):
